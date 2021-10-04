@@ -5,8 +5,9 @@ import math
 import os
 
 class photo:
-    def __init__(self, path, title):
+    def __init__(self, path, title="Unamed Photo"):
         #Read in image
+        self.fileName = path.split('/')[-1]
         self.image = cv2.imread(path)
         self.title = title
 
@@ -76,3 +77,4 @@ class photo:
         #closing all open windows
         cv2.destroyAllWindows()
 
+    def save(self):
