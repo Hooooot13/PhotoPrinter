@@ -58,6 +58,11 @@ class photo:
         textY = self.ImageBottom + self.textsize[1] + 30  #int((img.shape[0] + textsize[1]) / 2)
         self.imageWithText = cv2.putText(self.image_with_border, self.text, ( textX, textY ), self.font, self.fontsize, self.textColor, self.linewidth)
 
+        self.titlesize = cv2.getTextSize(self.title, self.font, self.fontsize, self.linewidth )[0]
+        textX = int((self.image_with_border.shape[1] - self.titlesize[0]) / 2)
+        textY = self.top - self.titlesize[1] - 30
+        self.imageWithText = cv2.putText(self.imageWithText, self.title, ( textX, textY ), self.font, self.fontsize, self.textColor, self.linewidth)
+
         self.resizedImage = cv2.resize(self.imageWithText, self.finalResolution, interpolation = cv2.INTER_AREA)
         
 
@@ -78,3 +83,4 @@ class photo:
         cv2.destroyAllWindows()
 
     def save(self):
+        cv2.imwrite(f"{self.fileName.split('.')[0]}_B.jpg", self.imageWithText)
