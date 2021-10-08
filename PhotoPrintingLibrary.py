@@ -57,8 +57,8 @@ class photo:
         
         
         self.font = cv2.FONT_HERSHEY_SIMPLEX
-        self.fontsize = 4
-        self.linewidth = 8
+        self.fontsize = 0.5*(self.squareSize/3000)
+        self.linewidth = int(1*(self.squareSize/3000))
         self.textsize = cv2.getTextSize(self.text, self.font, self.fontsize, self.linewidth )[0]
         self.textColor = (0, 0, 0)
 
@@ -72,6 +72,8 @@ class photo:
         self.imageWithText = cv2.putText(self.imageWithText, self.title, ( textX, textY ), self.font, self.fontsize, self.textColor, self.linewidth)
 
         self.resizedImage = cv2.resize(self.imageWithText, self.finalResolution, interpolation = cv2.INTER_AREA)
+
+        print(f"{self.title} {self.squareSize}")
         
 
     def print(self):
