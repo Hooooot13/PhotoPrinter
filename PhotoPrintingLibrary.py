@@ -2,6 +2,7 @@ import cv2
 from PIL import Image
 from PIL.ExifTags import TAGS
 import math
+import numpy as np
 import os
 
 class photo:
@@ -35,9 +36,9 @@ class photo:
 
         #Calcualte Border
         if self.image.shape[1] >= self.image.shape[0]:
-            self.squareSize = round(self.image.shape[1]+1000, -3)
+            self.squareSize = self.image.shape[1]+int(self.image.shape[1]/12)
         else:
-            self.squareSize = round(self.image.shape[0]+1000, -3)
+            self.squareSize = self.image.shape[0]+int(self.image.shape[0]/12)
         self.top = int((self.squareSize-self.image.shape[0])/2)
         self.bottom = int((self.squareSize-self.image.shape[0])/2)
         self.left = int((self.squareSize-self.image.shape[1])/2)
@@ -49,29 +50,30 @@ class photo:
 
         #define the print size
         # These are all defaults
-        self.printSize = [3, 3]
+        self.printSize = [12, 12]
         self.dpi = 300
-        self.finalResolution = (self.printSize[0]*self.dpi, self.printSize[1]*self.dpi)
+        self.finalResolution = (3600, 3600)
 
         self.image_with_border = cv2.copyMakeBorder(self.image, self.top, self.bottom, self.left, self.right, cv2.BORDER_CONSTANT, value=self.borderColor)
         
+        self.resizedImage = cv2.resize(self.image_with_border, self.finalResolution, interpolation = cv2.INTER_AREA)
         
         self.font = cv2.FONT_HERSHEY_SIMPLEX
-        self.fontsize = 0.5*(self.squareSize/3000)
-        self.linewidth = int(1*(self.squareSize/3000))
+        self.fontsize = 1#*(self.squareSize/2000)
+        self.linewidth = 2#int(1*(self.squareSize/2000))
         self.textsize = cv2.getTextSize(self.text, self.font, self.fontsize, self.linewidth )[0]
         self.textColor = (0, 0, 0)
 
-        textX = int((self.image_with_border.shape[1] - self.textsize[0]) / 2)
-        textY = self.ImageBottom + self.textsize[1] + 30  #int((img.shape[0] + textsize[1]) / 2)
-        self.imageWithText = cv2.putText(self.image_with_border, self.text, ( textX, textY ), self.font, self.fontsize, self.textColor, self.linewidth)
+        textX = int((self.resizedImage.shape[1]- self.textsize[0]) / 2)
+        textY = int((self.ImageBottom*(3600/self.squareSize))  + self.textsize[1]*2)  #int((img.shape[0] + textsize[1]) / 2)
+        self.imageWithText = cv2.putText(self.resizedImage, self.text, ( textX, textY ), self.font, self.fontsize, self.textColor, self.linewidth)
 
         self.titlesize = cv2.getTextSize(self.title, self.font, self.fontsize, self.linewidth )[0]
-        textX = int((self.image_with_border.shape[1] - self.titlesize[0]) / 2)
-        textY = self.top - self.titlesize[1] - 30
-        self.imageWithText = cv2.putText(self.imageWithText, self.title, ( textX, textY ), self.font, self.fontsize, self.textColor, self.linewidth)
+        textX = int(((self.resizedImage.shape[1]  - self.titlesize[0]) / 2))
+        textY = int((self.top*(3600/self.squareSize))  - (self.titlesize[1]))
+        self.imageWithText = cv2.putText(self.resizedImage, self.title, ( textX, textY ), self.font, self.fontsize, self.textColor, self.linewidth)
 
-        self.resizedImage = cv2.resize(self.imageWithText, self.finalResolution, interpolation = cv2.INTER_AREA)
+        
 
         print(f"{self.title} {self.squareSize}")
         
@@ -122,3 +124,20 @@ class photo:
     
     def save(self):
         cv2.imwrite(f"{self.fileName.split('.')[0]}_B.jpg", self.imageWithText)
+
+
+def collage(arrayIM):
+    spacing = 300
+    
+    for i in range(len(arrayIM)):
+        #arrayIM[i] = cv2.resize(arrayIM[i], (2000, 2000), interpolation = cv2.INTER_AREA)
+        arrayIM[i] = cv2.copyMakeBorder(arrayIM[i], 20, 20, 20, 20, cv2.BORDER_CONSTANT, value=(0, 0, 0))
+        arrayIM[i] = cv2.copyMakeBorder(arrayIM[i], spacing, spacing, spacing, spacing, cv2.BORDER_CONSTANT, value=(246, 249, 250))
+    
+    H1 = np.hstack([arrayIM[0], arrayIM[1], arrayIM[2]])
+    H2 = np.hstack([arrayIM[3], arrayIM[4], arrayIM[5]])
+    H3 = np.hstack([arrayIM[6], arrayIM[7], arrayIM[8]])
+
+    V = np.vstack([H1, H2, H3])
+
+    cv2.imwrite("Arangment.jpg", V)
